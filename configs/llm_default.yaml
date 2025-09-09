@@ -1,0 +1,66 @@
+data:
+  bands:
+  - delta
+  - theta
+  - alpha
+  - beta
+  - gamma
+  data_path: data/ds004148
+  high_freq: 40.0
+  low_freq: 1.0
+  n_subjects: 10
+  notch_freq: 50.0
+  overlap: 0.5
+  segment_length: 4.0
+  sessions:
+  - session1
+  tasks:
+  - memory
+  - mathematic
+  - music
+  - eyesopen
+  - eyesclosed
+experiment:
+  calibration_method: temperature
+  cv_folds: 5
+  description: Default configuration for cognitive state classification
+  experiment_name: cognitive_classification_default
+  generate_plots: true
+  log_level: INFO
+  output_dir: outputs
+  run_name: null
+  save_model: true
+  save_predictions: true
+  seed: 42
+  stratify: true
+  test_size: 0.2
+  use_cv: false
+  val_size: 0.1
+features:
+  add_special_tokens: true
+  binning_strategy: quantile
+  include_band_info: true
+  include_channel_info: true
+  include_spatial_info: true
+  max_vocab_size: 10000
+  min_frequency: 2
+  n_bins: 3
+model:
+  C: 1.0
+  batch_size: 16
+  dropout: 0.1
+  epochs: 5
+  eval_batch_size: 32
+  hidden_dim: 128
+  kernel: rbf
+  learning_rate: 0.0002
+  lora_alpha: 16
+  lora_dropout: 0.1
+  lora_r: 8
+  max_length: 512
+  model_type: distilgpt2
+  optimizer: adamw
+  use_lora: true
+  warmup_steps: 100
+  weight_decay: 0.01
+version: '1.0'

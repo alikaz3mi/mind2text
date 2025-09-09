@@ -1,33 +1,64 @@
+import logging
+import re
+import subprocess
+from pathlib import Path
+from typing import List
+
 from setuptools import setup, find_packages
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+logger = logging.getLogger(__name__)
+console_handler = logging.StreamHandler()
+
+logger.addHandler(console_handler)
+logger.setLevel(logging.DEBUG)
+
+
+def post_install():
+    """Implement post installation routine"""
+    with open("./requirements.txt") as f:
+        install_requires = f.read().splitlines()
+
+    install_requires = check_requirements(install_requires)
+
+    return install_requires
+
+
+def check_requirements(install_requires: List[str]):
+    installed_pacakges_idx = []
+    for idx, package in enumerate(install_requires):
+        if "git" in package or "--" in package:
+            result = subprocess.run(
+                f"pip install {package}", shell=True, capture_output=True, text=True
+            )
+            logger.info(f"{result.stdout}")
+            if result.stderr != "":
+                logger.error(f"{result.stderr}")
+            installed_pacakges_idx.append(idx)
+    for idx in installed_pacakges_idx:
+        install_requires[idx] = ""
+    install_requires = [x for x in install_requires if x != ""]
+    return install_requires
+
+
+def install_extra_requires(packages: List[str]):
+    return check_requirements(packages)
+
+
+
+def get_version():
+    file = Path(f'./mind2text/__init__.py')
+    return re.search(r'^__version__ *= *[\'"]([^\'"]*)[\'"]', file.read_text(encoding='utf-8'), re.M)[1]
+
 
 setup(
-    name="mind2text",
-    version="0.1.0",
-    author="Ali Kazemi",
-    author_email="alikaz3mi@ieee.org",
-    description="LLM-based Classification and Explainable Analysis of Motor Imagery EEG",
-    long_description_content_type="text/markdown",
-    url="https://github.com/alikaz3mi/mind2text",
+    name=f"mind2text",
+    version=get_version(),
+    url=f'git@github.com:alikaz3mi/mind2text.git',
+    description=' ',  # TODO: Short description of this project
+    zip_safe=False,
     packages=find_packages(),
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Topic :: Scientific/Engineering :: Medical Science Apps.",
-    ],
-    python_requires=">=3.8",
-    install_requires=requirements,
-    extras_require={
-        "dev": ["pytest>=6.0", "black>=22.0", "flake8>=4.0", "mypy>=0.910"],
-        "docs": ["sphinx>=4.0", "sphinx-rtd-theme>=1.0"],
+    install_requires=post_install(),
+    extra_requires={
+        'all': install_extra_requires(packages=[])
     },
 )
