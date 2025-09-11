@@ -99,38 +99,63 @@ ln -s data/ds004148-download data/ds004148
 
 ## 🧠 Step 3: Model Setup
 
-### 3.1 Download the Llama-3.1-8B-EEG-TimeLLM Model
+### 3.1 Download the Llama-3.1-8B Model
+
+**⚠️ Important Note:** The original EEG-specialized model (`ms57rd/Llama-3.1-8B-quantized-EEG-TimeLLM`) has incomplete files on Hugging Face. We'll use a working quantized Llama model instead:
+
 ```bash
-# Create models directory
-mkdir -p models
-
-# Download the model using Git LFS
-cd models
-git clone https://huggingface.co/ms57rd/Llama-3.1-8B-quantized-EEG-TimeLLM
-
-# Verify model files
-ls Llama-3.1-8B-quantized-EEG-TimeLLM/
-# You should see model files including config.json, pytorch_model.bin, etc.
-```
-
-### 3.2 Test Model Loading
-```bash
-cd ..  # Back to mind2text root
-
-# Test if the model loads correctly
+# Option 1: Use working quantized Llama model (Recommended)
 python -c "
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-model_path = 'models/Llama-3.1-8B-quantized-EEG-TimeLLM'
-tokenizer = AutoTokenizer.from_pretrained(model_path)
+# Use a complete quantized model
+model_name = 'akshathmangudi/llama3.1-8b-quantized'
+print(f'Downloading model: {model_name}')
+
+# Download and test the model
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+print('✅ Tokenizer loaded successfully!')
+
 model = AutoModelForCausalLM.from_pretrained(
-    model_path,
+    model_name,
     torch_dtype=torch.float16,
     device_map='auto'
 )
 print('✅ Model loaded successfully!')
 print(f'Model size: {sum(p.numel() for p in model.parameters()) / 1e9:.2f}B parameters')
+"
+
+# Option 2: Download original model (may have issues)
+# mkdir -p models
+# cd models
+# git clone https://huggingface.co/ms57rd/Llama-3.1-8B-quantized-EEG-TimeLLM
+```
+
+### 3.2 Create Model Directory and Set Path
+```bash
+# Create models directory for our project
+mkdir -p models
+
+# We'll use the Hugging Face model directly, but create a symlink for consistency
+# This allows us to keep the same paths in our code
+python -c "
+import os
+import json
+
+# Create a config file to track our model choice
+config = {
+    'model_name': 'akshathmangudi/llama3.1-8b-quantized',
+    'model_type': 'quantized_llama',
+    'use_huggingface_direct': True,
+    'note': 'Using complete quantized model instead of incomplete EEG-TimeLLM model'
+}
+
+os.makedirs('models', exist_ok=True)
+with open('models/model_config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+
+print('✅ Model configuration saved to models/model_config.json')
 "
 ```
 
@@ -163,7 +188,7 @@ features:
 
 model:
   model_type: "llama"
-  model_name: "models/Llama-3.1-8B-quantized-EEG-TimeLLM"
+  model_name: "akshathmangudi/llama3.1-8b-quantized"  # Updated to working model
   use_lora: true
   lora_r: 16
   lora_alpha: 32
