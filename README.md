@@ -465,9 +465,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, suggestions, or collaborations:
 
-- **Email**: [your-email@university.edu]
-- **GitHub**: [your-github-username]
-- **Lab Website**: [your-lab-website.edu]
+- **Email**: [alikazemi@ieee.org]
+- **GitHub**: [alikaz3mi]
 
 ## 🔮 Future Directions
 
