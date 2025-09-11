@@ -209,3 +209,14 @@ __marimo__/
 
 # Data
 data/ds004148-download
+
+*.phase*
+
+
+
+# Zip
+*.zip
+*.tar.gz
+*.tar
+*.tar.bz2
+*.rar
