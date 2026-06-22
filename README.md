@@ -19,8 +19,7 @@ EEG-as-language experiments, not a finished benchmark.
 The pipeline converts a continuous EEG recording into a symbolic token sequence, then
 hands that sequence to a sequence model. Each stage exchanges a validated Pydantic entity
 with the next (`Trial` → `FeatureVector` → `TokenSequence`), so the data contract between
-stages is explicit and checkable. Green stages are implemented in this repository; amber
-stages are specified but not yet implemented.
+stages is explicit and checkable.
 
 ![Mind2Text architecture: EEG to symbolic tokens to a language-model classifier, with a zoomed view of the symbolic encoder](docs/architecture.svg)
 
