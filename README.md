@@ -175,9 +175,10 @@ diagrams), so the classifier's confidence can be assessed rather than taken at f
 
 ## References
 
-**Dataset**
+**Datasets**
 
-- OpenNeuro ds004148 — cognitive-task EEG. https://openneuro.org/datasets/ds004148
+- Wang et al. (2022). *A test-retest resting and cognitive state EEG dataset.* OpenNeuro ds004148. DOI: 10.18112/openneuro.ds004148.v1.0.0. https://openneuro.org/datasets/ds004148
+- Schalk, G., McFarland, D. J., Hinterberger, T., Birbaumer, N., Wolpaw, J. R. (2004). *BCI2000: A General-Purpose Brain-Computer Interface (BCI) System.* IEEE Transactions on Biomedical Engineering, 51(6), 1034-1043. PhysioNet EEG Motor Movement/Imagery Database (EEGMMIDB). https://physionet.org/content/eegmmidb/1.0.0/
 
 **Tooling**
 
