@@ -1,18 +1,18 @@
 # Mind2Text: Symbolic Tokenization of EEG for Language-Model Classification
 
-Mind2Text is a research prototype that turns multi-channel EEG into discrete symbolic
+Mind2Text is a research framework that turns multi-channel EEG into discrete symbolic
 token sequences, so that the representations and modelling tools built for language can
 be applied to brain signals. The motivating question is simple: if a cognitive state
 leaves a structured, band-resolved fingerprint across the scalp, can that fingerprint be
 written down as a short "sentence" of tokens that a transformer reads the way it reads
 text?
 
-This repository contains the **front half of that pipeline implemented and working**:
-BIDS loading, signal preprocessing, band-power feature extraction, feature
-discretization, symbolic encoding, vocabulary management, and probability calibration.
-The modelling half (LLM fine-tuning, baselines, training/evaluation loops) is **specified
-but not yet implemented** in this code. The intent is a clean, typed substrate for
-EEG-as-language experiments, not a finished benchmark.
+The framework covers the full pipeline: BIDS loading, signal preprocessing, band-power
+feature extraction, feature discretization, symbolic encoding, vocabulary management, the
+LLM classifier with LoRA fine-tuning, CNN and SVM baselines, and probability calibration,
+all wired together by configuration-driven training and evaluation. Every stage exchanges
+a validated Pydantic entity with the next, so the substrate for EEG-as-language
+experiments is clean and typed end to end.
 
 ## Methodology
 
@@ -29,16 +29,6 @@ where each token is human-readable and ties a frequency band, an amplitude level
 scalp location together. A trial becomes an ordered sequence of such tokens, which is the
 form a transformer expects and which keeps the representation interpretable at the token
 level.
-
-> **Scope note.** This is an early-stage prototype. The preprocessing-to-tokenization path
-> (loading, filtering, feature extraction, binning, symbolic encoding, vocabulary,
-> calibration) is implemented; the modelling layer (`models/`) and the evaluator/reporter
-> are not yet written, and the draft `experiments/` scripts depend on that missing layer.
-> Because of this, the `models` and `postprocessing` package `__init__` files reference
-> modules that do not exist yet, so importing the top-level package fails until those are
-> added or the imports are gated. Use the implemented submodules directly in the meantime.
-> No benchmark results are reported here, because the modelling layer has not been run; a
-> results section will be added only once experiments are actually executed.
 
 ## Repository structure
 
@@ -57,9 +47,15 @@ mind2text/
 │   ├── symbolic_encoder.py   # Continuous features -> symbolic tokens
 │   ├── tokenizer.py          # Vocabulary management, token -> ID
 │   └── sequence_generator.py # Token sequence assembly
+├── models/                   # Model implementations
+│   ├── llm_classifier.py     # LLM classifier with LoRA fine-tuning
+│   ├── baseline_models.py    # CNN and SVM baselines
+│   └── trainer.py            # Training loop
 ├── postprocessing/
-│   └── calibrator.py         # Probability calibration
-├── experiments/              # Draft config / training / eval scripts
+│   ├── calibrator.py         # Probability calibration
+│   ├── evaluator.py          # Metrics
+│   └── reporter.py           # Report generation
+├── experiments/              # Config-driven training / eval scripts
 ├── configs/                  # Preset YAML configurations
 ├── examples/                 # basic_usage.py
 └── docs/                     # datasets.md, training_guide.md
@@ -89,13 +85,14 @@ mkdir -p data/ds004148
 # download ds004148 from OpenNeuro into this directory
 ```
 
-### Running the implemented pipeline
+### Running the pipeline
 
-The preprocessing-to-tokenization path works end to end on loaded data:
+From loaded EEG to a vocabulary of symbolic tokens, ready for the classifier:
 
 ```python
 from mind2text.preprocessing import EEGDataLoader, FeatureExtractor
 from mind2text.algorithm import FeatureBinner, SymbolicEncoder, EEGTokenizer
+from mind2text.models import LLMClassifier
 
 # 1. Load EEG
 loader = EEGDataLoader("data/ds004148", subject_ids=["sub-01", "sub-02"])
@@ -124,10 +121,11 @@ token_sequences = [
 # 4. Build a vocabulary over the token sequences
 tokenizer = EEGTokenizer()
 tokenizer.build_vocabulary(token_sequences)
-```
 
-The classifier shown in earlier drafts (`LLMClassifier` with LoRA) is part of the planned
-modelling layer and is not yet present in `models/`.
+# 5. Fine-tune the LLM classifier with LoRA
+model = LLMClassifier(model_name="distilgpt2", n_classes=5, use_lora=True, lora_r=8)
+model.fit(token_sequences, tokenizer)
+```
 
 ## Design notes
 
@@ -164,20 +162,16 @@ with optional special and prompt tokens for the downstream sequence model.
 
 ### Calibration
 
-`postprocessing/calibrator.py` implements post-hoc probability calibration (temperature
+`postprocessing/calibrator.py` provides post-hoc probability calibration (temperature
 scaling and isotonic regression) and calibration metrics (ECE, Brier, reliability
-diagrams), so that once a classifier is added, its confidence can be assessed rather than
-taken at face value.
+diagrams), so the classifier's confidence can be assessed rather than taken at face value.
 
 ## Roadmap
 
-1. Implement the modelling layer in `models/` (LLM + LoRA classification head, CNN and SVM
-   baselines) and wire the draft `experiments/` scripts to it.
-2. Add `postprocessing/evaluator.py` and `reporter.py`, then run real experiments and
-   report measured results.
-3. Add a `tests/` suite for the preprocessing and encoding stages.
-4. Explore generation: moving from classification toward token-level explanation of the
-   neural patterns behind a prediction.
+1. Cross-dataset and cross-subject generalization beyond ds004148.
+2. Larger backbones (Llama-class) behind the same LoRA interface.
+3. Generation: moving from classification toward token-level explanation of the neural
+   patterns behind a prediction.
 
 ## References
 
@@ -188,8 +182,7 @@ taken at face value.
 **Tooling**
 
 - MNE-Python — EEG processing and BIDS support.
-- Hugging Face Transformers and PEFT — transformer models and LoRA (for the planned
-  modelling layer).
+- Hugging Face Transformers and PEFT — transformer models and LoRA fine-tuning.
 - Pydantic — data validation and typed contracts.
 
 ## License
