@@ -11,35 +11,18 @@ This repository contains the **front half of that pipeline implemented and worki
 BIDS loading, signal preprocessing, band-power feature extraction, feature
 discretization, symbolic encoding, vocabulary management, and probability calibration.
 The modelling half (LLM fine-tuning, baselines, training/evaluation loops) is **specified
-but not yet implemented** in this code; see [Status](#status) for an honest breakdown of
-what runs today versus what is planned. The intent is a clean, typed substrate for
+but not yet implemented** in this code. The intent is a clean, typed substrate for
 EEG-as-language experiments, not a finished benchmark.
 
 ## Methodology
 
-The pipeline converts a continuous EEG recording into a symbolic sequence in five stages.
-Each stage hands a validated Pydantic entity to the next, so the data contract between
-stages is explicit and checkable.
+The pipeline converts a continuous EEG recording into a symbolic token sequence, then
+hands that sequence to a sequence model. Each stage exchanges a validated Pydantic entity
+with the next (`Trial` → `FeatureVector` → `TokenSequence`), so the data contract between
+stages is explicit and checkable. Green stages are implemented in this repository; amber
+stages are specified but not yet implemented.
 
-```mermaid
-flowchart TD
-    A["Raw EEG recording<br/>(BIDS / BrainVision, 61 ch @ 500 Hz)"] --> B
-    B["Signal preprocessing<br/>band-pass 1-40 Hz, 50 Hz notch,<br/>re-reference, segment into windows"] --> C
-    C["Feature extraction<br/>band power per channel x band<br/>(delta, theta, alpha, beta, gamma)"] --> D
-    D["Discretization (binning)<br/>per-feature quantile / uniform / k-means bins"] --> E
-    E["Symbolic encoding<br/>each binned feature -> a token,<br/>e.g. ALPHA_HIGH_FCz, BETA_LOW_C3"] --> F
-    F["Tokenization<br/>build vocabulary, map tokens -> IDs,<br/>add special / prompt tokens"] --> G
-    G["Sequence model (planned)<br/>LLM + LoRA classification head"] --> H
-    H["Calibration & evaluation<br/>temperature / isotonic scaling,<br/>ECE / Brier, reliability diagrams"] --> I["Cognitive-state prediction<br/>with calibrated confidence"]
-
-    classDef done fill:#d7ecd9,stroke:#3a7d44,color:#14233b;
-    classDef planned fill:#f3e2c7,stroke:#b07d2b,color:#14233b;
-    class A,B,C,D,E,F,H done;
-    class G,I planned;
-```
-
-Green stages are implemented in this repository; amber stages are specified but not yet
-implemented (see [Status](#status)).
+![Mind2Text architecture: EEG to symbolic tokens to a language-model classifier, with a zoomed view of the symbolic encoder](docs/architecture.svg)
 
 **Why symbolic tokens.** Band-power features are continuous and channel-indexed. Binning
 each feature and naming the bin (e.g. `ALPHA_HIGH_FCz`) produces a discrete vocabulary
@@ -48,37 +31,15 @@ scalp location together. A trial becomes an ordered sequence of such tokens, whi
 form a transformer expects and which keeps the representation interpretable at the token
 level.
 
-## Status
-
-This is an early-stage prototype. The table below is the source of truth for what the
-code actually does; the rest of the README describes the design the prototype is built
-toward.
-
-| Component | Module | State |
-|-----------|--------|-------|
-| BIDS / BrainVision loading | `preprocessing/eeg_loader.py` | Implemented |
-| Signal preprocessing (filter, notch, re-reference) | `preprocessing/signal_processor.py` | Implemented |
-| Trial segmentation (windowing) | `preprocessing/trial_segmenter.py` | Implemented |
-| Band-power feature extraction | `preprocessing/feature_extractor.py` | Implemented |
-| Feature discretization / binning | `algorithm/binning.py` | Implemented |
-| Symbolic encoding | `algorithm/symbolic_encoder.py` | Implemented |
-| Vocabulary / tokenization | `algorithm/tokenizer.py` | Implemented |
-| Sequence generation | `algorithm/sequence_generator.py` | Implemented |
-| Probability calibration | `postprocessing/calibrator.py` | Implemented |
-| Typed data contracts (Pydantic) | `entities/` | Implemented |
-| LLM classifier (LoRA fine-tuning) | `models/` | Planned (not implemented) |
-| CNN / SVM baselines | `models/` | Planned (not implemented) |
-| Training / evaluation loops | `experiments/` | Draft scripts; depend on the unimplemented model layer |
-| Evaluator / reporter | `postprocessing/` | Planned (not implemented) |
-| Unit tests | `tests/` | Not yet written |
-
-> The `models` and `postprocessing` package `__init__` files currently reference modules
-> that are not implemented yet (the planned model and reporting layer), so importing the
-> top-level package will fail until those are added or the imports are gated. Use the
-> implemented submodules directly (preprocessing, algorithm, calibrator) in the meantime.
-> No trained-model results or benchmark numbers are reported here, because the modelling
-> layer has not been run; any results section will be added only once experiments are
-> actually executed.
+> **Scope note.** This is an early-stage prototype. The preprocessing-to-tokenization path
+> (loading, filtering, feature extraction, binning, symbolic encoding, vocabulary,
+> calibration) is implemented; the modelling layer (`models/`) and the evaluator/reporter
+> are not yet written, and the draft `experiments/` scripts depend on that missing layer.
+> Because of this, the `models` and `postprocessing` package `__init__` files reference
+> modules that do not exist yet, so importing the top-level package fails until those are
+> added or the imports are gated. Use the implemented submodules directly in the meantime.
+> No benchmark results are reported here, because the modelling layer has not been run; a
+> results section will be added only once experiments are actually executed.
 
 ## Repository structure
 

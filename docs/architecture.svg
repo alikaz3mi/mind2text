@@ -1,0 +1,288 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" font-family="Carlito, Calibri, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <!-- arrowheads -->
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#3b4a5e"/>
+    </marker>
+    <marker id="arrowDash" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#b07d2b"/>
+    </marker>
+    <!-- gradients -->
+    <linearGradient id="gImpl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dff0e2"/>
+      <stop offset="1" stop-color="#c4e6cb"/>
+    </linearGradient>
+    <linearGradient id="gPlan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbeccf"/>
+      <stop offset="1" stop-color="#f4ddb0"/>
+    </linearGradient>
+    <linearGradient id="gBrain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4c9c9"/>
+      <stop offset="1" stop-color="#d98a8a"/>
+    </linearGradient>
+    <linearGradient id="gHeat" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2c3a87"/>
+      <stop offset="0.45" stop-color="#3aa0a0"/>
+      <stop offset="0.7" stop-color="#e8c245"/>
+      <stop offset="1" stop-color="#d6453b"/>
+    </linearGradient>
+    <linearGradient id="gInset" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbfcff"/>
+      <stop offset="1" stop-color="#eef2f8"/>
+    </linearGradient>
+    <style>
+      .title { font-size: 23px; font-weight: 700; fill: #14233b; }
+      .stage { font-size: 15px; font-weight: 700; fill: #14233b; }
+      .sub   { font-size: 11.5px; fill: #3b4a5e; }
+      .lbl   { font-size: 12.5px; font-weight: 700; fill: #14233b; }
+      .mono  { font-family: 'DejaVu Sans Mono', Consolas, monospace; font-size: 11px; fill: #14233b; }
+      .tiny  { font-size: 10.5px; fill: #5a6b80; }
+      .flow  { fill: none; stroke: #3b4a5e; stroke-width: 2.2; }
+      .box   { stroke-width: 1.6; rx: 12; }
+      .impl  { fill: url(#gImpl); stroke: #3a7d44; }
+      .plan  { fill: url(#gPlan); stroke: #b07d2b; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="720" fill="#ffffff"/>
+
+  <!-- ================= TITLE ================= -->
+  <text x="40" y="46" class="title">Mind2Text: EEG &#8594; symbolic tokens &#8594; language-model classification</text>
+  <line x1="40" y1="58" x2="1240" y2="58" stroke="#dde3ec" stroke-width="2"/>
+
+  <!-- ================= MAIN PIPELINE ROW ================= -->
+  <!-- y center of the main row -->
+  <!-- 1. Raw EEG (brain + cap glyph) -->
+  <g transform="translate(40,110)">
+    <rect class="box impl" width="150" height="150"/>
+    <!-- brain -->
+    <g transform="translate(75,58)">
+      <path d="M-38,4 C-46,-22 -20,-40 0,-32 C18,-42 46,-22 38,4
+               C48,14 40,34 22,32 C14,44 -14,44 -22,32 C-40,34 -48,14 -38,4 Z"
+            fill="url(#gBrain)" stroke="#a85b5b" stroke-width="1.6"/>
+      <path d="M0,-32 L0,32 M-20,-26 C-6,-14 -6,8 -18,28 M20,-26 C6,-14 6,8 18,28"
+            fill="none" stroke="#a85b5b" stroke-width="1.2" opacity="0.7"/>
+      <!-- electrodes -->
+      <circle cx="-22" cy="-10" r="3.2" fill="#14233b"/>
+      <circle cx="0" cy="-22" r="3.2" fill="#14233b"/>
+      <circle cx="22" cy="-10" r="3.2" fill="#14233b"/>
+      <circle cx="-12" cy="14" r="3.2" fill="#14233b"/>
+      <circle cx="12" cy="14" r="3.2" fill="#14233b"/>
+    </g>
+    <text x="75" y="116" text-anchor="middle" class="stage">Raw EEG</text>
+    <text x="75" y="133" text-anchor="middle" class="sub">BIDS / BrainVision</text>
+    <text x="75" y="148" text-anchor="middle" class="sub">61 ch &#183; 500 Hz</text>
+  </g>
+
+  <!-- 2. Preprocessing (waveforms) -->
+  <g transform="translate(238,110)">
+    <rect class="box impl" width="160" height="150"/>
+    <!-- 3 electrode traces -->
+    <g transform="translate(16,20)" stroke="#3a7d44" stroke-width="1.6" fill="none" opacity="0.9">
+      <path d="M0,12 q8,-12 16,0 t16,0 t16,0 t16,0 t16,0 t16,0 t16,0 t16,0"/>
+      <path d="M0,32 q6,10 12,-2 t12,4 t12,-6 t12,2 t12,-4 t12,5 t12,-3 t12,2 t12,-2" stroke="#2c7a7a"/>
+      <path d="M0,52 q10,-6 20,3 t20,-4 t20,5 t20,-3 t20,2" stroke="#b07d2b"/>
+    </g>
+    <text x="80" y="100" text-anchor="middle" class="stage">Preprocessing</text>
+    <text x="80" y="117" text-anchor="middle" class="sub">band-pass 1&#8211;40 Hz</text>
+    <text x="80" y="131" text-anchor="middle" class="sub">50 Hz notch &#183; re-ref</text>
+    <text x="80" y="145" text-anchor="middle" class="sub">windowed trials</text>
+  </g>
+
+  <!-- 3. Feature extraction (band-power heatmap) -->
+  <g transform="translate(446,110)">
+    <rect class="box impl" width="160" height="150"/>
+    <!-- heatmap grid 5 bands x 4 ch -->
+    <g transform="translate(24,22)">
+      <rect x="0" y="0" width="92" height="56" fill="url(#gHeat)" opacity="0.92" rx="3"/>
+      <g stroke="#ffffff" stroke-width="1" opacity="0.55">
+        <line x1="0" y1="14" x2="92" y2="14"/><line x1="0" y1="28" x2="92" y2="28"/><line x1="0" y1="42" x2="92" y2="42"/>
+        <line x1="23" y1="0" x2="23" y2="56"/><line x1="46" y1="0" x2="46" y2="56"/><line x1="69" y1="0" x2="69" y2="56"/>
+      </g>
+      <text x="-3" y="8"  text-anchor="end" class="tiny">&#948;</text>
+      <text x="-3" y="22" text-anchor="end" class="tiny">&#945;</text>
+      <text x="-3" y="36" text-anchor="end" class="tiny">&#946;</text>
+      <text x="-3" y="50" text-anchor="end" class="tiny">&#947;</text>
+    </g>
+    <text x="80" y="100" text-anchor="middle" class="stage">Band power</text>
+    <text x="80" y="117" text-anchor="middle" class="sub">5 bands &#215; channels</text>
+    <text x="80" y="131" text-anchor="middle" class="sub">&#948; &#952; &#945; &#946; &#947;</text>
+    <text x="80" y="145" text-anchor="middle" class="sub">per-trial features</text>
+  </g>
+
+  <!-- 4. Symbolic encoder (zoomed below) -->
+  <g transform="translate(654,110)">
+    <rect class="box impl" width="170" height="150" stroke-dasharray="0"/>
+    <!-- bin ladder -->
+    <g transform="translate(20,22)">
+      <rect x="0" y="0"  width="40" height="11" fill="#c4e6cb" stroke="#3a7d44"/>
+      <rect x="0" y="13" width="40" height="11" fill="#9fd6aa" stroke="#3a7d44"/>
+      <rect x="0" y="26" width="40" height="11" fill="#5fb874" stroke="#3a7d44"/>
+      <text x="48" y="9"  class="tiny">low</text>
+      <text x="48" y="22" class="tiny">med</text>
+      <text x="48" y="35" class="tiny">high</text>
+      <!-- token chips -->
+      <rect x="96" y="2"  width="56" height="14" rx="3" fill="#fff" stroke="#3a7d44"/>
+      <rect x="96" y="20" width="56" height="14" rx="3" fill="#fff" stroke="#3a7d44"/>
+      <text x="124" y="12" text-anchor="middle" class="mono" style="font-size:8.5px">A_HI_FCz</text>
+      <text x="124" y="30" text-anchor="middle" class="mono" style="font-size:8.5px">B_LO_C3</text>
+    </g>
+    <text x="85" y="100" text-anchor="middle" class="stage">Symbolic encoder</text>
+    <text x="85" y="117" text-anchor="middle" class="sub">bin &#8594; named token</text>
+    <text x="85" y="131" text-anchor="middle" class="sub">band &#183; level &#183; channel</text>
+    <text x="85" y="145" text-anchor="middle" class="sub">+ vocabulary</text>
+  </g>
+
+  <!-- 5. LLM + LoRA (planned) -->
+  <g transform="translate(872,110)">
+    <rect class="box plan" width="160" height="150"/>
+    <!-- transformer stack glyph -->
+    <g transform="translate(40,18)" fill="#f4ddb0" stroke="#b07d2b" stroke-width="1.4">
+      <rect x="0" y="0"  width="80" height="14" rx="3"/>
+      <rect x="0" y="18" width="80" height="14" rx="3"/>
+      <rect x="0" y="36" width="80" height="14" rx="3"/>
+      <!-- LoRA side adapters -->
+      <rect x="-13" y="6"  width="9" height="38" rx="2" fill="#d6453b" stroke="#9c2e27"/>
+      <rect x="84" y="6"  width="9" height="38" rx="2" fill="#d6453b" stroke="#9c2e27"/>
+    </g>
+    <text x="80" y="100" text-anchor="middle" class="stage">LLM + LoRA</text>
+    <text x="80" y="117" text-anchor="middle" class="sub">GPT-2 / DistilGPT-2</text>
+    <text x="80" y="131" text-anchor="middle" class="sub">low-rank adapters</text>
+    <text x="80" y="145" text-anchor="middle" class="sub">classification head</text>
+  </g>
+
+  <!-- 6. Calibration + prediction (planned) -->
+  <g transform="translate(1080,110)">
+    <rect class="box plan" width="160" height="150"/>
+    <!-- reliability diagram glyph -->
+    <g transform="translate(22,18)">
+      <rect x="0" y="0" width="62" height="50" fill="#fff" stroke="#b07d2b" stroke-width="1.2" rx="2"/>
+      <line x1="0" y1="50" x2="62" y2="0" stroke="#9aa6b6" stroke-width="1" stroke-dasharray="3,3"/>
+      <path d="M2,46 L18,40 L34,26 L50,12 L60,4" fill="none" stroke="#d6453b" stroke-width="2"/>
+      <circle cx="18" cy="40" r="2.2" fill="#d6453b"/><circle cx="34" cy="26" r="2.2" fill="#d6453b"/><circle cx="50" cy="12" r="2.2" fill="#d6453b"/>
+    </g>
+    <text x="80" y="100" text-anchor="middle" class="stage">Calibration</text>
+    <text x="80" y="117" text-anchor="middle" class="sub">temperature / isotonic</text>
+    <text x="80" y="131" text-anchor="middle" class="sub">ECE &#183; Brier</text>
+    <text x="80" y="145" text-anchor="middle" class="sub">&#8594; cognitive state</text>
+  </g>
+
+  <!-- main flow arrows (between the 6 boxes), y = 185 -->
+  <g>
+    <line class="flow" x1="190" y1="185" x2="232" y2="185" marker-end="url(#arrow)"/>
+    <line class="flow" x1="398" y1="185" x2="440" y2="185" marker-end="url(#arrow)"/>
+    <line class="flow" x1="606" y1="185" x2="648" y2="185" marker-end="url(#arrow)"/>
+    <line class="flow" x1="824" y1="185" x2="866" y2="185" marker-end="url(#arrow)"/>
+    <line class="flow" x1="1032" y1="185" x2="1074" y2="185" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- data-contract caption under the row -->
+  <rect x="372" y="282" width="536" height="22" rx="6" fill="#ffffff" stroke="#e3e8f0" stroke-width="1"/>
+  <text x="640" y="297" text-anchor="middle" class="tiny" style="font-style:italic">
+    each stage exchanges a validated Pydantic entity (Trial &#8594; FeatureVector &#8594; TokenSequence)
+  </text>
+
+  <!-- ============== ZOOM CONNECTORS from symbolic encoder to inset ============== -->
+  <g stroke="#3a7d44" stroke-width="1.4" stroke-dasharray="5,4" fill="none">
+    <line x1="700" y1="262" x2="180" y2="356"/>
+    <line x1="780" y1="262" x2="1100" y2="356"/>
+  </g>
+
+  <!-- ============== INSET: inside the symbolic encoder ============== -->
+  <g transform="translate(60,355)">
+    <rect width="1160" height="320" rx="18" fill="url(#gInset)" stroke="#cfd8e6" stroke-width="1.6"/>
+    <text x="24" y="34" class="stage" style="font-size:16px">Inside the symbolic encoder &#8212; continuous features become an ordered token sentence</text>
+
+    <!-- A. feature vector (continuous bars) -->
+    <g transform="translate(40,70)">
+      <text x="80" y="-10" text-anchor="middle" class="lbl">band-power vector</text>
+      <g fill="#3aa0a0" stroke="#2c7a7a" stroke-width="1">
+        <rect x="0"  y="120" width="16" height="-78" /><rect x="22" y="120" width="16" height="-40"/>
+        <rect x="44" y="120" width="16" height="-100"/><rect x="66" y="120" width="16" height="-26"/>
+        <rect x="88" y="120" width="16" height="-62"/><rect x="110" y="120" width="16" height="-90"/>
+        <rect x="132" y="120" width="16" height="-34"/>
+      </g>
+      <line x1="-4" y1="120" x2="160" y2="120" stroke="#5a6b80" stroke-width="1.4"/>
+      <text x="80" y="140" text-anchor="middle" class="tiny">x_band,ch &#8712; &#8477;</text>
+    </g>
+
+    <line class="flow" x1="210" y1="130" x2="262" y2="130" marker-end="url(#arrow)"/>
+
+    <!-- B. binning -->
+    <g transform="translate(268,72)">
+      <rect width="150" height="120" rx="10" fill="#dff0e2" stroke="#3a7d44" stroke-width="1.4"/>
+      <text x="75" y="26" text-anchor="middle" class="lbl">discretize</text>
+      <text x="75" y="44" text-anchor="middle" class="tiny">quantile / uniform / k-means</text>
+      <!-- bin edges -->
+      <g transform="translate(20,58)">
+        <rect x="0" y="0" width="110" height="40" fill="#fff" stroke="#3a7d44"/>
+        <line x1="36" y1="0" x2="36" y2="40" stroke="#3a7d44" stroke-dasharray="3,3"/>
+        <line x1="73" y1="0" x2="73" y2="40" stroke="#3a7d44" stroke-dasharray="3,3"/>
+        <text x="18" y="25" text-anchor="middle" class="tiny">low</text>
+        <text x="55" y="25" text-anchor="middle" class="tiny">med</text>
+        <text x="92" y="25" text-anchor="middle" class="tiny">high</text>
+      </g>
+    </g>
+
+    <line class="flow" x1="418" y1="130" x2="470" y2="130" marker-end="url(#arrow)"/>
+
+    <!-- C. naming -> tokens -->
+    <g transform="translate(476,72)">
+      <rect width="180" height="120" rx="10" fill="#dff0e2" stroke="#3a7d44" stroke-width="1.4"/>
+      <text x="90" y="26" text-anchor="middle" class="lbl">name each bin</text>
+      <g transform="translate(16,40)">
+        <rect x="0"  y="0"  width="148" height="20" rx="4" fill="#fff" stroke="#3a7d44"/>
+        <rect x="0"  y="26" width="148" height="20" rx="4" fill="#fff" stroke="#3a7d44"/>
+        <rect x="0"  y="52" width="148" height="20" rx="4" fill="#fff" stroke="#3a7d44"/>
+        <text x="74" y="14" text-anchor="middle" class="mono">ALPHA_HIGH_FCz</text>
+        <text x="74" y="40" text-anchor="middle" class="mono">BETA_LOW_C3</text>
+        <text x="74" y="66" text-anchor="middle" class="mono">THETA_MED_Pz</text>
+      </g>
+    </g>
+
+    <line class="flow" x1="656" y1="130" x2="708" y2="130" marker-end="url(#arrow)"/>
+
+    <!-- D. vocabulary / IDs -->
+    <g transform="translate(714,72)">
+      <rect width="160" height="120" rx="10" fill="#dff0e2" stroke="#3a7d44" stroke-width="1.4"/>
+      <text x="80" y="26" text-anchor="middle" class="lbl">vocabulary</text>
+      <text x="80" y="44" text-anchor="middle" class="tiny">token &#8594; integer id</text>
+      <g transform="translate(22,56)" class="mono" fill="#14233b">
+        <text x="0" y="12">ALPHA_HIGH_FCz</text><text x="116" y="12" fill="#b07d2b">17</text>
+        <text x="0" y="30">BETA_LOW_C3</text><text x="116" y="30" fill="#b07d2b">42</text>
+        <text x="0" y="48">[BOS] &#183; [PAD]</text><text x="116" y="48" fill="#b07d2b">0,1</text>
+      </g>
+    </g>
+
+    <line class="flow" x1="874" y1="130" x2="926" y2="130" marker-end="url(#arrow)"/>
+
+    <!-- E. token sequence chips -->
+    <g transform="translate(932,70)">
+      <text x="95" y="0" text-anchor="middle" class="lbl">token sequence (a trial)</text>
+      <g transform="translate(0,16)">
+        <rect x="0"   y="0" width="30" height="26" rx="5" fill="#5fb874" stroke="#2f6b3e"/>
+        <rect x="36"  y="0" width="30" height="26" rx="5" fill="#9fd6aa" stroke="#2f6b3e"/>
+        <rect x="72"  y="0" width="30" height="26" rx="5" fill="#5fb874" stroke="#2f6b3e"/>
+        <rect x="108" y="0" width="30" height="26" rx="5" fill="#c4e6cb" stroke="#2f6b3e"/>
+        <rect x="144" y="0" width="30" height="26" rx="5" fill="#9fd6aa" stroke="#2f6b3e"/>
+        <text x="95" y="48" text-anchor="middle" class="tiny">interpretable, transformer-ready</text>
+      </g>
+      <!-- arrow onward to LLM (planned) -->
+      <g transform="translate(0,86)">
+        <rect x="0" y="0" width="190" height="48" rx="10" fill="url(#gPlan)" stroke="#b07d2b" stroke-width="1.4"/>
+        <text x="95" y="20" text-anchor="middle" class="lbl">&#8594; LLM + LoRA (planned)</text>
+        <text x="95" y="38" text-anchor="middle" class="tiny">reads the sentence, predicts state</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============== LEGEND ============== -->
+  <g transform="translate(40,690)">
+    <rect x="0" y="-12" width="16" height="16" rx="3" fill="url(#gImpl)" stroke="#3a7d44"/>
+    <text x="22" y="1" class="sub">implemented in this repository</text>
+    <rect x="240" y="-12" width="16" height="16" rx="3" fill="url(#gPlan)" stroke="#b07d2b"/>
+    <text x="262" y="1" class="sub">planned (not yet implemented)</text>
+    <rect x="470" y="-12" width="16" height="16" rx="3" fill="#d6453b" stroke="#9c2e27"/>
+    <text x="492" y="1" class="sub">LoRA low-rank adapters</text>
+  </g>
+</svg>
